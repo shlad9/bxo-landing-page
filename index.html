@@ -20,6 +20,7 @@
         .navbar {
             display: flex;
             justify-content: center;
+            flex-wrap: wrap;
             background-color: #111;
             padding: 15px 0;
             position: fixed;
@@ -27,13 +28,14 @@
             top: 0;
             left: 0;
             z-index: 100;
+            text-align: center;
         }
 
         .navbar a {
             color: white;
             text-decoration: none;
-            padding: 14px 20px;
-            font-size: 18px;
+            padding: 10px 15px;
+            font-size: 16px;
             cursor: pointer;
         }
 
@@ -50,6 +52,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            text-align: center;
         }
 
         .active-section {
@@ -69,6 +72,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
 
         .logo {
@@ -86,7 +90,7 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 0 20px;
+            padding: 20px;
             width: 100%;
         }
 
@@ -121,16 +125,20 @@
             text-align: left;
             padding: 50px;
             width: 100%;
+            box-sizing: border-box;
         }
 
         .about-text {
             width: 50%;
-            padding-right: 20px;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .about-image {
             width: 50%;
             text-align: right;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .about-image img {
@@ -144,6 +152,7 @@
             gap: 20px;
             margin-top: 20px;
             justify-content: left;
+            flex-wrap: wrap;
         }
 
         .email-button {
@@ -160,6 +169,45 @@
         .email-button:hover {
             background-color: #666;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .about-section {
+                flex-direction: column;
+                text-align: center;
+                padding: 30px;
+            }
+
+            .about-text, .about-image {
+                width: 100%;
+                padding: 20px;
+                text-align: center;
+            }
+
+            .about-image {
+                order: -1;
+            }
+
+            .navbar {
+                flex-direction: column;
+                padding: 10px 0;
+            }
+
+            .navbar a {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .bottom-section p {
+                font-size: 16px;
+                max-width: 90%;
+            }
+
+            .waitlist-button {
+                font-size: 16px;
+                padding: 12px 24px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -170,7 +218,6 @@
         <a href="#" class="tab-link" onclick="switchTab(event, 'product')">Product</a>
         <a href="#" class="tab-link" onclick="switchTab(event, 'about')">About Us</a>
     </div>
-
     <!-- Home Section -->
     <div id="home" class="section home-section active-section">
         <div class="top-section">
@@ -191,21 +238,17 @@
 
     <!-- About Us Section -->
     <div id="about" class="section about-section">
+        <div class="about-image">
+            <img src="teampic.jpg" alt="BxOffice Team">
+        </div>
         <div class="about-text">
             <h2>About Us</h2>
-            <p>Nice to meet you! We are Mahek (CEO, BxO) and Swapnil (CTO, BxO) - students at Harvard Business School builidng the future of content. </p>
-            <p>What started as a long conversation about anime TV shows and Bollywood movies in New Zealand, turned into an idea to create a place for people to share their thoughts on content with their friends in a fun, easy, and community-based manner. We realized we weren't alone in this desire to know about and share content recommendations with friends. People wanted to move beyond the "Film Bros" and award shows, to find content based on their network, a much more trusted source.</p>
-            <p>We are an innovative and creative team with backgrounds in content, data science, product, and strategy. But more importantly, we pride ourselves on being community first in everything we do.</p>
-
+            <p>Nice to meet you! We are Mahek (CEO, BxO) and Swapnil (CTO, BxO) - students at Harvard Business School building the future of content.</p>
+            <p>What started as a long conversation about anime TV shows and Bollywood movies in New Zealand, turned into an idea to create a place for people to share their thoughts on content with their friends in a fun, easy, and community-based manner.</p>
             <div class="email-buttons">
-                <!-- <button class="email-button" onclick="sendEmail('mahekrmodi@gmail.com')">Email Mahek</button>
-                <button class="email-button" onclick="sendEmail('swapnil.h.lad@gmail.com')">Email Swapnil</button> -->
                 <a href="mailto:mahekrmodi@gmail.com" class="email-button">Email Mahek</a>
                 <a href="mailto:swapnil.h.lad@gmail.com" class="email-button">Email Swapnil</a>
             </div>
-        </div>
-        <div class="about-image">
-            <img src="teampic.jpg" alt="BxOffice Team">
         </div>
     </div>
 
@@ -221,10 +264,6 @@
 
             document.getElementById(sectionId).style.display = 'flex';
             event.currentTarget.classList.add('active');
-        }
-
-        function sendEmail(email) {
-            window.location.href = "mailto:" + email;
         }
     </script>
 </body>
