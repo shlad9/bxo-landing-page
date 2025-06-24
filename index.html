@@ -16,7 +16,7 @@
             flex-direction: column;
         }
 
-        /* Navbar Styles  */
+        /* Navbar Styles */
         .navbar {
             display: flex;
             justify-content: center;
@@ -343,6 +343,18 @@
             }
         }
 
+        /* Button Animation */
+        @keyframes fadeIn {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .about-section {
@@ -447,10 +459,11 @@
             <img src="bxologoexp1111333333.png" alt="BxOffice Logo" class="logo">
         </div>
         <div class="bottom-section">
-            <p>We are building the future of entertainment and media through community and data.<br><br>
-            <strong>bxo</strong> is an invite-only platform designed to change how the world consumes content.<br><br>
-            </p>
-            <a href="https://form.typeform.com/to/wWcfHYEN" class="waitlist-button">Join the Waitlist</a>
+            <p>We are building the future of entertainment and media through community and data.</p>
+            <p><strong>bxo</strong> is an invite-only platform designed to change how the world consumes content.</p>
+            <div id="waitlist-container" style="animation: fadeIn 1s ease-in 0.5s forwards; opacity: 0;">
+                <a href="https://form.typeform.com/to/wWcfHYEN" class="waitlist-button">Join the Waitlist</a>
+            </div>
         </div>
     </div>
 
@@ -488,7 +501,7 @@
                     <div class="profile-details">
                         Favorite Actor: Henry Cavill<br>
                         Favorite Movie: The Dark Knight<br>
-                        Favorite TV Show: Shingeki no Kyojin
+                        Favorite TV Show: Attack on Titan
                     </div>
                 </div>
             </div>
