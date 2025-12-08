@@ -1,603 +1,741 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" type="image/png" href="favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UnScene - The Future of Entertainment</title>
+    <title>UnScene - Prescriptive Entertainment</title>
     <style>
-        body {
+        * {
             margin: 0;
-            font-family: "Courier New", monospace;
-            background-color: black;
-            color: white;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Navbar Styles */
-        .navbar {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            background-color: #111;
-            padding: 15px 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            left: 0;
-            z-index: 100;
-            text-align: center;
-        }
-
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .navbar a:hover, .navbar a.active {
-            background-color: #222;
-            border-radius: 5px;
-        }
-
-        /* Section Styles */
-        .section {
-            display: none;
-            padding-top: 80px;
-            min-height: 100vh;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .active-section {
-            display: flex !important;
-            position: relative;
-        }
-
-        /* Home Section */
-        .home-section {
-            flex-direction: column;
-            height: 100vh;
-            padding-top: 0;
-        }
-
-        .top-section {
-            background-color: black;
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .logo {
-            max-width: 300px;
-            width: 100%;
-            height: auto;
-        }
-
-        .hero-text {
-            text-align: center;
-        }
-
-        .hero-title {
-            font-family: "Courier New", monospace;
-            font-size: 64px;
-            margin: 0;
-            font-weight: normal;
-        }
-
-        .hero-subtitle {
-            font-family: "Courier New", monospace;
-            font-size: 20px;
-            margin-top: 10px;
-            color: #ccc;
-            letter-spacing: 1px;
-        }
-
-        .bottom-section {
-            background-color: #222;
-            color: white;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-            width: 100%;
-        }
-
-        .bottom-section p {
-            max-width: 600px;
-            font-size: 18px;
-        }
-
-        .waitlist-button {
-            background-color: black;
-            color: white;
-            border: none;
-            padding: 14.4px 28.8px;
-            font-size: 19.2px;
-            cursor: pointer;
-            margin-top: 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .waitlist-button:hover {
-            background-color: #444;
-        }
-
-        /* About Us Section Layout */
-        .about-section {
-            flex-direction: row;
-            align-items: flex-start;
-            justify-content: space-between;
-            text-align: left;
-            padding: 50px;
-            width: 100%;
-            box-sizing: border-box;
-            gap: 40px;
-        }
-
-        .about-image {
-            width: 45%;
-            flex-shrink: 0;
-        }
-
-        .about-image img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
-        }
-
-        .about-text {
-            width: 55%;
             padding: 0;
             box-sizing: border-box;
         }
 
-        /* Team Profiles Styles */
-        .team-profiles {
-            margin-top: 30px;
+        :root {
+            --primary-blue: #b5ccee;
+            --dark-blue: #9ab8e0;
+            --light-gray: #3a4057;
+            --text-dark: #ffffff;
+            --text-light: #b0b0b0;
+            --accent-blue: #c9dcf2;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--text-dark);
+            overflow-x: hidden;
+            background: #303549;
+        }
+
+        /* Navigation */
+        nav {
             display: flex;
-            justify-content: flex-start;
-            gap: 40px;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(48, 53, 73, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(181, 204, 238, 0.1);
         }
 
-        .profile {
-            text-align: center;
-            max-width: 250px;
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            letter-spacing: -0.5px;
         }
 
-        .profile-image {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 20px;
-        }
-
-        .profile-name {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .profile-title {
-            font-size: 16px;
-            color: #ccc;
-            margin-bottom: 15px;
-        }
-
-        .profile-details {
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        /* Product Section Styles */
-        .product-section {
-            padding: 100px 40px 40px 40px;
-            justify-content: center;
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
             align-items: center;
         }
 
-        .product-image {
-            max-width: 100%;
-            max-height: 80vh;
-            width: auto;
-            height: auto;
-            border-radius: 10px;
-            object-fit: contain;
-            transform: scale(1.4);
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
         }
 
-        /* Floating X Icons */
-        .floating-x-container {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .nav-links a:hover {
+            color: var(--primary-blue);
+        }
+
+        .cta-button {
+            background: var(--primary-blue);
+            color: white;
+            padding: 0.75rem 1.75rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(181, 204, 238, 0.2);
+        }
+
+        .cta-button:hover {
+            background: var(--accent-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(181, 204, 238, 0.3);
+            color: white;
+        }
+
+        /* Hero Section */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            padding: 10rem 5% 6rem;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #303549 0%, #3a4057 100%);
+        }
+
+        .hero-content {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .tag {
+            display: inline-block;
+            background: rgba(181, 204, 238, 0.15);
+            color: var(--primary-blue);
+            padding: 0.5rem 1.25rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            line-height: 1.2;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: -1px;
+        }
+
+        .highlight {
+            color: var(--primary-blue);
+        }
+
+        .hero-description {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        .join-beta-btn {
+            display: inline-block;
+            padding: 1.25rem 3rem;
+            background: var(--primary-blue);
+            color: #303549;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(181, 204, 238, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .join-beta-btn:hover {
+            background: var(--accent-blue);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(181, 204, 238, 0.4);
+        }
+
+        .phone-mockup {
+            position: relative;
+            animation: fadeInRight 1s ease forwards;
+            animation-delay: 0.3s;
+            opacity: 0;
+        }
+
+        .phone-mockup img {
+            width: 100%;
+            max-width: 400px;
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.1));
+            margin-left: auto;
+            display: block;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 5%;
+            background: #303549;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.125rem;
+            color: var(--text-light);
+            margin-bottom: 4rem;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Community Definition */
+        .community-definition {
+            max-width: 900px;
+            margin: 0 auto 4rem;
+        }
+
+        .definition-intro {
+            text-align: center;
+            font-size: 1.3rem;
+            color: var(--text-dark);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .definition-box {
+            background: #303549;
+            padding: 2.5rem;
+            border-radius: 12px;
+            border: 2px solid var(--primary-blue);
+        }
+
+        .definition-box h3 {
+            font-size: 2rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .pronunciation {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .definition-list {
+            margin-left: 1.5rem;
+            color: var(--text-light);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .definition-list li {
+            margin-bottom: 1rem;
+        }
+
+        /* Scrollable Features */
+        .features-scroll-container {
+            overflow-x: auto;
+            padding: 2rem 0;
+            margin: 0 -5%;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .features-scroll {
+            display: flex;
+            gap: 2rem;
+            padding: 0 5%;
+            min-width: min-content;
+        }
+
+        .feature-item {
+            flex: 0 0 320px;
+            text-align: center;
+        }
+
+        .feature-screenshot {
+            width: 320px;
+            height: 640px;
+            background: rgba(26, 26, 26, 0.5);
+            border: 1px solid rgba(181, 204, 238, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .feature-screenshot img {
             width: 100%;
             height: 100%;
-            pointer-events: none;
+            object-fit: cover;
+        }
+
+        .feature-item h3 {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .feature-item p {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            line-height: 1.6;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+
+        /* Custom scrollbar */
+        .features-scroll-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .features-scroll-container::-webkit-scrollbar-track {
+            background: rgba(26, 26, 26, 0.3);
+            border-radius: 4px;
+        }
+
+        .features-scroll-container::-webkit-scrollbar-thumb {
+            background: var(--primary-blue);
+            border-radius: 4px;
+        }
+
+        .features-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-blue);
+        }
+
+        /* Team Section */
+        .team {
+            padding: 6rem 5%;
+            background: linear-gradient(135deg, #3a4057 0%, #303549 100%);
+        }
+
+        /* Top Section: Photo + Text */
+        .about-top {
+            display: grid;
+            grid-template-columns: 40% 60%;
+            gap: 4rem;
+            max-width: 1400px;
+            margin: 3rem auto 5rem;
+            align-items: center;
+        }
+
+        .founders-photo {
+            background: rgba(26, 26, 26, 0.5);
+            border: 1px solid rgba(181, 204, 238, 0.1);
+            border-radius: 16px;
             overflow: hidden;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .floating-x {
-            position: absolute;
-            font-family: "Courier New", monospace;
+        .founders-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .about-text {
+            padding-right: 1rem;
+        }
+
+        .about-text .section-subtitle {
+            text-align: left;
+            max-width: 100%;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            padding-right: 2rem;
+        }
+
+        /* Bottom Section: Team Grid */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .team-member {
+            text-align: center;
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        .team-member:nth-child(1) { animation-delay: 0.1s; }
+        .team-member:nth-child(2) { animation-delay: 0.2s; }
+        .team-member:nth-child(3) { animation-delay: 0.3s; }
+
+        .team-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #303549;
+            font-weight: 700;
+        }
+
+        .team-member h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .team-member p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 6rem 5%;
+            background: #2a2f42;
+            text-align: center;
             color: white;
-            opacity: 0.3;
-            font-size: 24px;
-            transition: transform 0.3s ease-out;
-            cursor: none;
         }
 
-        .floating-x:nth-child(1) { 
-            left: 8%; top: 15%;
-            animation: floatInCircle 25s infinite linear;
-            animation-delay: 0s; 
-        }
-        .floating-x:nth-child(2) { 
-            left: 92%; top: 35%;
-            animation: floatInCircle 18s infinite linear;
-            animation-delay: -5s; 
-        }
-        .floating-x:nth-child(3) { 
-            left: 25%; top: 8%;
-            animation: floatInCircle 22s infinite linear;
-            animation-delay: -12s; 
-        }
-        .floating-x:nth-child(4) { 
-            left: 78%; top: 18%;
-            animation: floatInCircle 16s infinite linear;
-            animation-delay: -8s; 
-        }
-        .floating-x:nth-child(5) { 
-            left: 42%; top: 42%;
-            animation: floatInCircle 30s infinite linear;
-            animation-delay: -15s; 
-        }
-        .floating-x:nth-child(6) { 
-            left: 15%; top: 28%;
-            animation: floatInCircle 20s infinite linear;
-            animation-delay: -3s; 
-        }
-        .floating-x:nth-child(7) { 
-            left: 65%; top: 45%;
-            animation: floatInCircle 28s infinite linear;
-            animation-delay: -20s; 
-        }
-        .floating-x:nth-child(8) { 
-            left: 88%; top: 12%;
-            animation: floatInCircle 24s infinite linear;
-            animation-delay: -10s; 
-        }
-        .floating-x:nth-child(9) { 
-            left: 35%; top: 22%;
-            animation: floatInCircle 19s infinite linear;
-            animation-delay: -7s; 
-        }
-        .floating-x:nth-child(10) { 
-            left: 52%; top: 38%;
-            animation: floatInCircle 26s infinite linear;
-            animation-delay: -18s; 
-        }
-        .floating-x:nth-child(11) { 
-            left: 18%; top: 45%;
-            animation: floatInCircle 21s infinite linear;
-            animation-delay: -4s; 
-        }
-        .floating-x:nth-child(12) { 
-            left: 72%; top: 28%;
-            animation: floatInCircle 27s infinite linear;
-            animation-delay: -13s; 
-        }
-        .floating-x:nth-child(13) { 
-            left: 5%; top: 38%;
-            animation: floatInCircle 17s infinite linear;
-            animation-delay: -9s;
-            font-size: 19px;
-        }
-        .floating-x:nth-child(14) { 
-            left: 58%; top: 15%;
-            animation: floatInCircle 23s infinite linear;
-            animation-delay: -16s;
-            font-size: 29px;
-        }
-        .floating-x:nth-child(15) { 
-            left: 82%; top: 42%;
-            animation: floatInCircle 29s infinite linear;
-            animation-delay: -6s;
-            font-size: 21px;
-        }
-        .floating-x:nth-child(16) { 
-            left: 28%; top: 32%;
-            animation: floatInCircle 18s infinite linear;
-            animation-delay: -11s;
-            font-size: 28px;
-        }
-        .floating-x:nth-child(17) { 
-            left: 48%; top: 12%;
-            animation: floatInCircle 25s infinite linear;
-            animation-delay: -14s;
-            font-size: 20px;
-        }
-        .floating-x:nth-child(18) { 
-            left: 95%; top: 25%;
-            animation: floatInCircle 31s infinite linear;
-            animation-delay: -22s;
-            font-size: 26px;
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
         }
 
-        @keyframes floatInCircle {
-            0% {
-                transform: translate(0px, 0px) rotate(0deg);
-            }
-            25% {
-                transform: translate(40px, -30px) rotate(90deg);
-            }
-            50% {
-                transform: translate(0px, -60px) rotate(180deg);
-            }
-            75% {
-                transform: translate(-40px, -30px) rotate(270deg);
-            }
-            100% {
-                transform: translate(0px, 0px) rotate(360deg);
-            }
+        .cta-section p {
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.8;
         }
 
-        /* Button Animation */
-        @keyframes fadeIn {
-            from { 
+        .beta-signup-btn {
+            display: inline-block;
+            padding: 1.25rem 3rem;
+            background: var(--primary-blue);
+            color: #000000;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(181, 204, 238, 0.3);
+        }
+
+        .beta-signup-btn:hover {
+            background: var(--accent-blue);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(181, 204, 238, 0.4);
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 5%;
+            background: #1A1A1A;
+            color: white;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px);
             }
-            to { 
+            to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
-        /* Responsive Design */
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            .about-section {
-                flex-direction: column;
+            .hero {
+                grid-template-columns: 1fr;
+                padding: 8rem 5% 4rem;
                 text-align: center;
-                padding: 30px 20px;
-                min-height: auto;
-                justify-content: flex-start;
-                gap: 30px;
             }
 
-            .about-image {
-                width: 100%;
-                order: -1;
-                padding-top: 100px;
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .phone-mockup img {
+                margin: 2rem auto 0;
+            }
+
+            .nav-links {
+                gap: 1.5rem;
+                font-size: 0.85rem;
+            }
+
+            .cta-button {
+                padding: 0.6rem 1.25rem;
+                font-size: 0.85rem;
+            }
+
+            .about-top {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                margin-bottom: 3rem;
+            }
+
+            .founders-photo {
+                min-height: 400px;
+            }
+
+            .about-text .section-subtitle {
+                font-size: 1rem;
+                padding-right: 0;
             }
 
             .about-text {
-                width: 100%;
-                text-align: center;
+                padding-right: 0;
             }
 
-            .about-image img {
-                max-width: 100%;
-                height: auto;
-                object-fit: contain;
-            }
-
-            .team-profiles {
-                justify-content: center;
-                gap: 30px;
-                margin-top: 25px;
-            }
-
-            .navbar {
-                flex-direction: column;
-                padding: 10px 0;
-            }
-
-            .navbar a {
-                padding: 8px 12px;
-                font-size: 14px;
-            }
-
-            .bottom-section p {
-                font-size: 16px;
-                max-width: 90%;
-            }
-
-            .waitlist-button {
-                font-size: 16px;
-                padding: 12px 24px;
-            }
-
-            .profile-image {
-                width: 120px;
-                height: 120px;
-            }
-
-            .product-section {
-                padding: 100px 20px 20px 20px;
-            }
-
-            .product-image {
-                max-height: 70vh;
-                border-radius: 8px;
-            }
-
-            .hero-title {
-                font-size: 42px;
-            }
-
-            .hero-subtitle {
-                font-size: 16px;
+            .team-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
             }
         }
     </style>
 </head>
 <body>
-
-    <!-- Navbar -->
-    <div class="navbar">
-        <a href="#" class="tab-link active" onclick="switchTab(event, 'home')">Home</a>
-        <a href="#" class="tab-link" onclick="switchTab(event, 'product')">Product</a>
-        <a href="#" class="tab-link" onclick="switchTab(event, 'about')">About Us</a>
-    </div>
-    <!-- Home Section -->
-    <div id="home" class="section home-section active-section">
-        <div class="top-section">
-            <div class="floating-x-container">
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-                <div class="floating-x">x</div>
-            </div>
-            <div class="hero-text">
-                <h1 class="hero-title">UnScene</h1>
-                <div class="hero-subtitle">prescriptive entertainment</div>
-            </div>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">UnScene</div>
+        <div class="nav-links">
+            <a href="#product">Product</a>
+            <a href="#team">About Us</a>
+            <a href="https://forms.gle/YOUR_BETA_FORM_LINK" class="cta-button" target="_blank">Join Beta</a>
         </div>
-        <div class="bottom-section">
-            <p>We are building the future of entertainment and media through community and data.</p>
-            <p>UnScene is an invite-only platform designed to change how the world consumes content.</p>
-            <div id="waitlist-container" style="animation: fadeIn 1s ease-in 0.5s forwards; opacity: 0;">
-                <a href="https://forms.gle/HCX28C24MnTWqMv16" class="waitlist-button">Join the Waitlist</a>
-            </div>
-        </div>
-    </div>
+    </nav>
 
-  <!-- Product Section -->
-<div id="product" class="section product-section">
-    <img src="productpagev1.png" alt="Product Page" class="product-image">
-</div>
-
-    <!-- About Us Section -->
-    <div id="about" class="section about-section">
-        <div class="about-image">
-            <img src="teampic.jpg" alt="BxOffice Team">
-        </div>
-        <div class="about-text">
-            <h2>About Us</h2>
-            <p>Nice to meet you! We are Mahek (CEO, UnScene Group LLC) and Swapnil (CTO, UnScene Group LLC) - alumni from Harvard Business School building the future of content.</p>
-            <p>What started as a long conversation about anime TV shows and Bollywood movies in New Zealand, turned into an idea to create a place for people to share their thoughts on content with their friends in a fun, easy, and community-based manner.</p>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <span class="tag">Prescriptive Entertainment</span>
+            <h1>Discover What<br>to <span class="highlight">Watch Next</span></h1>
+            <p class="hero-description">We are building the future of entertainment and media through community and data.<br><br>UnScene is an invite-only platform designed to change how the world consumes content.</p>
             
-            <div class="team-profiles">
-                <div class="profile">
-                    <img src="mahimo.jpg" alt="Mahek Modi" class="profile-image">
-                    <div class="profile-name">Mahek Modi</div>
-                    <div class="profile-title">CEO, Co-Founder</div>
-                    <div class="profile-details">
-                        Favorite Actor: Emma Watson<br>
-                        Favorite Movie: The Prestige<br>
-                        Favorite TV Show: Malcolm in the Middle
+            <a href="https://forms.gle/YOUR_BETA_FORM_LINK" class="join-beta-btn" target="_blank">
+                Join the Beta
+            </a>
+        </div>
+        
+        <div class="phone-mockup">
+            <!-- Replace this src with your actual app screenshot -->
+            <img src="https://via.placeholder.com/400x800/303549/b5ccee?text=UnScene+App" alt="UnScene App Screenshot">
+        </div>
+    </section>
+
+    <!-- Product Section -->
+    <section class="features" id="product">
+        <h2 class="section-title">Product</h2>
+        
+        <!-- Community Definition -->
+        <div class="community-definition">
+            <p class="definition-intro">We are building the future of content and media with an emphasis on community...</p>
+            
+            <div class="definition-box">
+                <h3>com·mu·ni·ty</h3>
+                <p class="pronunciation">/kə'myoonədē/</p>
+                <ol class="definition-list">
+                    <li>a feeling of fellowship with others, as a result of sharing common attitudes, interests, and goals.</li>
+                    <li>the people of a district or country considered collectively, especially in the context of social values and responsibilities; society</li>
+                </ol>
+            </div>
+        </div>
+        
+        <!-- Scrollable Features -->
+        <div class="features-scroll-container">
+            <div class="features-scroll">
+                <div class="feature-item">
+                    <div class="feature-screenshot">
+                        <!-- Replace with actual Socialize screenshot -->
+                        <img src="path-to-socialize-screenshot.jpg" alt="Socialize Feature">
                     </div>
+                    <h3>Socialize</h3>
+                    <p>Share your thoughts on content with friends in a fun, easy, and community-based manner.</p>
                 </div>
                 
-                <div class="profile">
-                    <img src="slad.jpg" alt="Swapnil Lad" class="profile-image">
-                    <div class="profile-name">Swapnil Lad</div>
-                    <div class="profile-title">CTO, Co-Founder</div>
-                    <div class="profile-details">
-                        Favorite Actor: Henry Cavill<br>
-                        Favorite Movie: The Dark Knight<br>
-                        Favorite TV Show: Attack on Titan
+                <div class="feature-item">
+                    <div class="feature-screenshot">
+                        <!-- Replace with actual Discover screenshot -->
+                        <img src="path-to-discover-screenshot.jpg" alt="Discover Feature">
                     </div>
+                    <h3>Discover</h3>
+                    <p>Find personalized entertainment recommendations based on your unique taste and mood.</p>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-screenshot">
+                        <!-- Replace with actual Journals screenshot -->
+                        <img src="path-to-journals-screenshot.jpg" alt="Journals Feature">
+                    </div>
+                    <h3>Journals</h3>
+                    <p>Document your entertainment journey and keep track of what you've watched and loved.</p>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-screenshot">
+                        <!-- Replace with actual Lists screenshot -->
+                        <img src="path-to-lists-screenshot.jpg" alt="Lists Feature">
+                    </div>
+                    <h3>Lists</h3>
+                    <p>Create and share curated lists of your favorite shows, movies, and content.</p>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <script>
-        function switchTab(event, sectionId) {
-            // Remove active-section class from all sections
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active-section');
-            });
-
-            // Remove active class from all tab links
-            document.querySelectorAll('.tab-link').forEach(tab => {
-                tab.classList.remove('active');
-            });
-
-            // Add active-section class to the selected section
-            document.getElementById(sectionId).classList.add('active-section');
+    <!-- Team Section -->
+    <section class="team" id="team">
+        <h2 class="section-title">About Us</h2>
+        
+        <!-- Top Section: Founders Photo + Story Text -->
+        <div class="about-top">
+            <div class="founders-photo">
+                <!-- Replace with your actual founders group photo -->
+                <img src="teampic.jpg" alt="UnScene Founders">
+            </div>
             
-            // Add active class to the clicked tab
-            event.currentTarget.classList.add('active');
-        }
-
-        // Floating X cursor interaction
-        document.addEventListener('DOMContentLoaded', function() {
-            const floatingXContainer = document.querySelector('.floating-x-container');
-            const floatingXs = document.querySelectorAll('.floating-x');
+            <div class="about-text">
+                <p class="section-subtitle">Nice to meet you! We are Mahek (CEO, UnScene Group LLC) and Swapnil (CTO, UnScene Group LLC) - alumni from Harvard Business School building the future of content.</p>
+                <p class="section-subtitle">What started as a long conversation about anime TV shows and Bollywood movies in New Zealand, turned into an idea to create a place for people to share their thoughts on content with their friends in a fun, easy, and community-based manner.</p>
+            </div>
+        </div>
+        
+        <!-- Bottom Section: Team Members -->
+        <div class="team-grid">
+            <div class="team-member">
+                <div class="team-photo">
+                    <!-- Replace with actual image -->
+                    <img src="mahimo.jpg" alt="Mahek Modi" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                </div>
+                <h3>Mahek Modi</h3>
+                <p style="margin-bottom: 1rem;">CEO, Co-Founder</p>
+                <p style="font-size: 0.85rem; line-height: 1.6;">
+                    <strong>Favorite Actor:</strong> Emma Watson<br>
+                    <strong>Favorite Movie:</strong> The Prestige<br>
+                    <strong>Favorite TV Show:</strong> Malcolm in the Middle
+                </p>
+            </div>
             
-            if (floatingXContainer) {
-                floatingXContainer.addEventListener('mousemove', function(e) {
-                    const rect = floatingXContainer.getBoundingClientRect();
-                    const mouseX = e.clientX - rect.left;
-                    const mouseY = e.clientY - rect.top;
-                    
-                    floatingXs.forEach(x => {
-                        const xRect = x.getBoundingClientRect();
-                        const xCenterX = xRect.left + xRect.width / 2 - rect.left;
-                        const xCenterY = xRect.top + xRect.height / 2 - rect.top;
-                        
-                        const deltaX = xCenterX - mouseX;
-                        const deltaY = xCenterY - mouseY;
-                        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-                        
-                        // Only affect x's within 150px of cursor
-                        if (distance < 150) {
-                            const force = (150 - distance) / 150;
-                            const pushX = (deltaX / distance) * force * 50;
-                            const pushY = (deltaY / distance) * force * 50;
-                            
-                            x.style.transform = `translate(${pushX}px, ${pushY}px) rotate(${force * 90}deg)`;
-                        } else {
-                            x.style.transform = '';
-                        }
-                    });
-                });
-                
-                // Reset positions when mouse leaves
-                floatingXContainer.addEventListener('mouseleave', function() {
-                    floatingXs.forEach(x => {
-                        x.style.transform = '';
-                    });
-                });
-            }
+            <div class="team-member">
+                <div class="team-photo">
+                    <!-- Replace with actual image -->
+                    <img src="slad.jpg" alt="Swapnil Lad" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                </div>
+                <h3>Swapnil Lad</h3>
+                <p style="margin-bottom: 1rem;">CTO, Co-Founder</p>
+                <p style="font-size: 0.85rem; line-height: 1.6;">
+                    <strong>Favorite Actor:</strong> Henry Cavill<br>
+                    <strong>Favorite Movie:</strong> The Dark Knight<br>
+                    <strong>Favorite TV Show:</strong> Attack on Titan
+                </p>
+            </div>
+            
+            <div class="team-member">
+                <div class="team-photo">
+                    <!-- Replace with actual image -->
+                    <img src="msripathi.jpg" alt="Manu Sripathi" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                </div>
+                <h3>Manu Sripathi</h3>
+                <p style="margin-bottom: 1rem;">Product Development</p>
+                <p style="font-size: 0.85rem; line-height: 1.6;">
+                    <strong>Favorite Actor:</strong> Zendaya<br>
+                    <strong>Favorite Movie:</strong> Everything Everywhere All at Once<br>
+                    <strong>Favorite TV Show:</strong> Stranger Things
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section" id="beta">
+        <h2>Ready to Discover Your Next Favorite?</h2>
+        <p>Join the invite-only platform changing how the world consumes content</p>
+        
+        <!-- Replace this href with your actual beta signup form (Google Forms, Typeform, etc.) -->
+        <a href="https://forms.gle/YOUR_BETA_FORM_LINK" class="beta-signup-btn" target="_blank">
+            Sign Up for Beta Access
+        </a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="/cdn-cgi/l/email-protection#2048454c4c4f60554e5343454e450e415050">Contact</a>
+            <a href="#">Support</a>
+        </div>
+        <p style="opacity: 0.6;">© 2024 UnScene. All rights reserved.</p>
+    </footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
         });
-    </script>
+
+        // Animate team members on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                }
+            });
+        }, observerOptions);
+
+      </script>
 </body>
 </html>
