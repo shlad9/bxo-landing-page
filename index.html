@@ -87,13 +87,23 @@
 
         /* Hero Section */
         .hero {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
+            flex-wrap: wrap;
             gap: 4rem;
             padding: 10rem 8% 6rem;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
             background: linear-gradient(135deg, #303549 0%, #3a4057 100%);
+        }
+
+        .hero-content {
+            flex: 1 1 400px;
+            max-width: 550px;
+        }
+
+        .phone-mockup {
+            flex: 0 0 320px;
         }
 
         .hero-content {
@@ -155,9 +165,7 @@
             animation: fadeInRight 1s ease forwards;
             animation-delay: 0.3s;
             opacity: 0;
-            display: flex;
-            justify-content: flex-end;
-            padding-right: 25%;
+            flex: 0 0 320px;
         }
 
         .phone-mockup-frame {
@@ -266,13 +274,13 @@
         /* Product Features Layout */
         .features-scroll-container {
             padding: 2rem 0;
+            display: flex;
+            justify-content: center;
         }
 
         .features-scroll {
             display: grid;
             gap: 3rem;
-            max-width: 1600px;
-            margin: 0 auto;
             justify-items: center;
         }
 
@@ -534,17 +542,20 @@
         /* Responsive */
         @media (max-width: 768px) {
             .hero {
-                grid-template-columns: 1fr;
                 padding: 8rem 6% 4rem;
                 text-align: center;
             }
 
-            h1 {
-                font-size: 2.5rem;
+            .hero-content {
+                flex: 1 1 100%;
             }
 
-            .phone-mockup img {
+            .phone-mockup {
                 margin: 2rem auto 0;
+            }
+
+            h1 {
+                font-size: 2.5rem;
             }
 
             .nav-links {
@@ -682,7 +693,7 @@
             <div class="about-text">
                 <p class="section-subtitle">Nice to meet you! We are Mahek (CEO, UnScene Group LLC) and Swapnil (CTO, UnScene Group LLC) - alumni from Harvard Business School building the future of content.</p>
                 <p class="section-subtitle">What started as a long conversation about anime TV shows and Bollywood movies in New Zealand, turned into an idea to create a place for people to share their thoughts on content with their friends in a fun, easy, and community-based manner.</p>
-                <p class="section-subtitle">We'd love to chat! Email us: <a href="mailto:unscene.app@gmail.com" style="color: var(--primary-blue); text-decoration: none; border-bottom: 1px solid var(--primary-blue);">unscene.app@gmail.com</a></p>
+                <p class="section-subtitle">We'd love to chat! Email us: <a href="/cdn-cgi/l/email-protection#c6b3a8b5a5a3a8a3e8a7b6b686a1aba7afaae8a5a9ab" style="color: var(--primary-blue); text-decoration: none; border-bottom: 1px solid var(--primary-blue);"><span class="__cf_email__" data-cfemail="90e5fee3f3f5fef5bef1e0e0d0f7fdf1f9fcbef3fffd">[email&#160;protected]</span></a></p>
             </div>
         </div>
         
@@ -751,7 +762,7 @@
         <p style="opacity: 0.6;">© 2024 UnScene. All rights reserved.</p>
     </footer>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -772,7 +783,7 @@
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
+                    ntry.target.style.opacity = '1';
                 }
             });
         }, observerOptions);
