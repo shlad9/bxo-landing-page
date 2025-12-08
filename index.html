@@ -32,7 +32,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem 5%;
+            padding: 1.5rem 8%;
             position: fixed;
             top: 0;
             width: 100%;
@@ -90,7 +90,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 4rem;
-            padding: 10rem 5% 6rem;
+            padding: 10rem 8% 6rem;
             align-items: center;
             min-height: 100vh;
             background: linear-gradient(135deg, #303549 0%, #3a4057 100%);
@@ -160,14 +160,33 @@
         .phone-mockup img {
             width: 100%;
             max-width: 400px;
-            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.1));
             margin-left: auto;
             display: block;
+            border: 12px solid #000000;
+            border-radius: 40px;
+            background: #1a1a1a;
+            box-shadow: 
+                0 0 0 2px #2a2a2a,
+                0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* iPhone notch for hero */
+        .phone-mockup::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 32px;
+            background: #000000;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
         }
 
         /* Features Section */
         .features {
-            padding: 6rem 5%;
+            padding: 6rem 8%;
             background: #303549;
         }
 
@@ -236,14 +255,14 @@
         .features-scroll-container {
             overflow-x: auto;
             padding: 2rem 0;
-            margin: 0 -5%;
+            margin: 0 -8%;
             -webkit-overflow-scrolling: touch;
         }
 
         .features-scroll {
             display: flex;
             gap: 2rem;
-            padding: 0 5%;
+            padding: 0 8%;
             min-width: min-content;
         }
 
@@ -255,15 +274,32 @@
         .feature-screenshot {
             width: 320px;
             height: 640px;
-            background: rgba(26, 26, 26, 0.5);
-            border: 1px solid rgba(181, 204, 238, 0.2);
-            border-radius: 20px;
+            background: #1a1a1a;
+            border: 12px solid #000000;
+            border-radius: 40px;
             overflow: hidden;
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            box-shadow: 
+                0 0 0 2px #2a2a2a,
+                0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* iPhone notch */
+        .feature-screenshot::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 28px;
+            background: #000000;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
         }
 
         .feature-screenshot img {
@@ -308,7 +344,7 @@
 
         /* Team Section */
         .team {
-            padding: 6rem 5%;
+            padding: 6rem 8%;
             background: linear-gradient(135deg, #3a4057 0%, #303549 100%);
         }
 
@@ -398,7 +434,7 @@
 
         /* CTA Section */
         .cta-section {
-            padding: 6rem 5%;
+            padding: 6rem 8%;
             background: #2a2f42;
             text-align: center;
             color: white;
@@ -437,7 +473,7 @@
 
         /* Footer */
         footer {
-            padding: 3rem 5%;
+            padding: 3rem 8%;
             background: #1A1A1A;
             color: white;
             text-align: center;
@@ -488,7 +524,7 @@
         @media (max-width: 768px) {
             .hero {
                 grid-template-columns: 1fr;
-                padding: 8rem 5% 4rem;
+                padding: 8rem 6% 4rem;
                 text-align: center;
             }
 
@@ -560,7 +596,6 @@
         </div>
         
         <div class="phone-mockup">
-            <!-- Replace this src with your actual app screenshot -->
             <img src="hero-app-screenshot.jpg" alt="UnScene App Screenshot">
         </div>
     </section>
@@ -588,7 +623,6 @@
             <div class="features-scroll">
                 <div class="feature-item">
                     <div class="feature-screenshot">
-                        <!-- Replace with actual Socialize screenshot -->
                         <img src="socialize-screenshot.jpg" alt="Socialize Feature">
                     </div>
                     <h3>Socialize</h3>
@@ -597,7 +631,6 @@
                 
                 <div class="feature-item">
                     <div class="feature-screenshot">
-                        <!-- Replace with actual Discover screenshot -->
                         <img src="discover-screenshot.jpg" alt="Discover Feature">
                     </div>
                     <h3>Discover</h3>
@@ -606,7 +639,6 @@
                 
                 <div class="feature-item">
                     <div class="feature-screenshot">
-                        <!-- Replace with actual Journals screenshot -->
                         <img src="journals-screenshot.jpg" alt="Journals Feature">
                     </div>
                     <h3>Journals</h3>
@@ -615,7 +647,6 @@
                 
                 <div class="feature-item">
                     <div class="feature-screenshot">
-                        <!-- Replace with actual Lists screenshot -->
                         <img src="lists-screenshot.jpg" alt="Lists Feature">
                     </div>
                     <h3>Lists</h3>
@@ -632,7 +663,6 @@
         <!-- Top Section: Founders Photo + Story Text -->
         <div class="about-top">
             <div class="founders-photo">
-                <!-- Replace with your actual founders group photo -->
                 <img src="teampic.jpg" alt="UnScene Founders">
             </div>
             
@@ -646,7 +676,6 @@
         <div class="team-grid">
             <div class="team-member">
                 <div class="team-photo">
-                    <!-- Replace with actual image -->
                     <img src="mahimo.jpg" alt="Mahek Modi" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                 </div>
                 <h3>Mahek Modi</h3>
@@ -660,7 +689,6 @@
             
             <div class="team-member">
                 <div class="team-photo">
-                    <!-- Replace with actual image -->
                     <img src="slad.jpg" alt="Swapnil Lad" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                 </div>
                 <h3>Swapnil Lad</h3>
@@ -674,7 +702,6 @@
             
             <div class="team-member">
                 <div class="team-photo">
-                    <!-- Replace with actual image -->
                     <img src="msripathi.jpg" alt="Manu Sripathi" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                 </div>
                 <h3>Manu Sripathi</h3>
