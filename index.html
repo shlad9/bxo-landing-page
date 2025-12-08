@@ -159,31 +159,40 @@
             justify-content: flex-end;
         }
 
-        .phone-mockup img {
+        .phone-mockup-frame {
             width: 320px;
             height: 640px;
-            display: block;
+            background: #1a1a1a;
             border: 12px solid #000000;
             border-radius: 40px;
-            background: #1a1a1a;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
             box-shadow: 
                 0 0 0 2px #2a2a2a,
                 0 20px 40px rgba(0, 0, 0, 0.4);
-            object-fit: cover;
         }
 
         /* iPhone notch for hero */
-        .phone-mockup::after {
+        .phone-mockup-frame::before {
             content: '';
             position: absolute;
-            top: 12px;
+            top: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 150px;
-            height: 32px;
+            width: 120px;
+            height: 28px;
             background: #000000;
             border-radius: 0 0 20px 20px;
             z-index: 10;
+        }
+
+        .phone-mockup-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         /* Features Section */
@@ -597,7 +606,9 @@
         </div>
         
         <div class="phone-mockup">
-            <img src="hero-app-screenshot.jpg" alt="UnScene App Screenshot">
+            <div class="phone-mockup-frame">
+                <img src="hero-app-screenshot.jpg" alt="UnScene App Screenshot">
+            </div>
         </div>
     </section>
 
