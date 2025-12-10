@@ -474,6 +474,8 @@
             font-size: 3rem;
             color: #303549;
             font-weight: 700;
+            overflow: hidden;
+            text-decoration: none;
         }
 
         .team-member h3 {
@@ -485,6 +487,14 @@
         .team-member p {
             color: var(--text-light);
             font-size: 0.95rem;
+        }
+
+        .team-photo img {
+            transition: transform 0.25s ease;
+        }
+
+        .team-photo:hover img {
+            transform: scale(1.1);
         }
 
         /* CTA Section */
@@ -763,9 +773,9 @@
         <!-- Bottom Section: Team Members -->
         <div class="team-grid">
             <div class="team-member">
-                <div class="team-photo">
+                <a class="team-photo" href="https://www.linkedin.com/in/mahekmodi/" target="_blank" rel="noopener noreferrer">
                     <img src="mahimo.jpg" alt="Mahek Modi" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                </div>
+                </a>
                 <h3>Mahek Modi</h3>
                 <p style="margin-bottom: 1rem;">CEO, Co-Founder</p>
                 <p style="font-size: 0.85rem; line-height: 1.6;">
@@ -776,9 +786,9 @@
             </div>
             
             <div class="team-member">
-                <div class="team-photo">
+                <a class="team-photo" href="https://www.linkedin.com/in/swapnillad99/" target="_blank" rel="noopener noreferrer">
                     <img src="slad.jpg" alt="Swapnil Lad" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                </div>
+                </a>
                 <h3>Swapnil Lad</h3>
                 <p style="margin-bottom: 1rem;">CTO, Co-Founder</p>
                 <p style="font-size: 0.85rem; line-height: 1.6;">
@@ -789,9 +799,9 @@
             </div>
             
             <div class="team-member">
-                <div class="team-photo">
+                <a class="team-photo" href="https://www.linkedin.com/in/msripathi/" target="_blank" rel="noopener noreferrer">
                     <img src="msripathi.jpg" alt="Manu Sripathi" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                </div>
+                </a>
                 <h3>Manu Sripathi</h3>
                 <p style="margin-bottom: 1rem;">Product Development</p>
                 <p style="font-size: 0.85rem; line-height: 1.6;">
