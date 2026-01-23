@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        // Check authentication before loading dashboard
+        if (sessionStorage.getItem('team_auth') !== 'true') {
+            window.location.href = '/team-login.html';
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnScene Beta Analytics Dashboard - Live Data</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left h1 {
+            font-size: 32px;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+        
+        .header-left p {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .refresh-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .refresh-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            margin: 20px 0;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 16px;
+            margin: 20px 0;
+            border-left: 4px solid #f56565;
+        }
+        
+        .error h3 {
+            color: #f56565;
+            margin-bottom: 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+        
+        .stat-change {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .stat-change.positive {
+            color: #48bb78;
+        }
+        
+        .stat-change.negative {
+            color: #f56565;
+        }
+        
+        .stat-change.neutral {
+            color: #718096;
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .chart-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+        
+        .chart-card h3 {
+            font-size: 18px;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        .table-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+        
+        .table-card h3 {
+            font-size: 18px;
+            color: #2d3748;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 12px;
+            background: #f7fafc;
+            color: #4a5568;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 12px;
+            border-top: 1px solid #e2e8f0;
+            color: #2d3748;
+            font-size: 14px;
+        }
+        
+        tr:hover {
+            background: #f7fafc;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a5568;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .tab.active {
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #edf2f7;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+        
+        .empty-state h3 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { createClient } = supabase;
+        
+        // Initialize Supabase client
+        const supabaseClient = createClient(
+            'https://pjwponrocpshsyyoxrro.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqd3BvbnJvY3BzaHN5eW94cnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMwMTk3MDIsImV4cCI6MjA1ODU5NTcwMn0.6qXEnOWCZOdzdhd8QxLJosbU9QLYviITNySqesRTdCM'
+        );
+        
+        const LineChart = ({ data, labelKey, valueKey, label }) => {
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+            
+            useEffect(() => {
+                if (chartRef.current && data && data.length > 0) {
+                    const ctx = chartRef.current.getContext('2d');
+                    
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                    
+                    chartInstance.current = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.map(d => d[labelKey]),
+                            datasets: [{
+                                label: label,
+                                data: data.map(d => d[valueKey]),
+                                borderColor: '#667eea',
+                                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                tension: 0.4,
+                                fill: true,
+                                pointBackgroundColor: '#667eea',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        maxTicksLimit: 10
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                return () => {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                };
+            }, [data, labelKey, valueKey, label]);
+            
+            if (!data || data.length === 0) {
+                return <div className="empty-state">No data available</div>;
+            }
+            
+            return <canvas ref={chartRef}></canvas>;
+        };
+        
+        const BarChart = ({ data, labelKey, valueKey, label }) => {
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+            
+            useEffect(() => {
+                if (chartRef.current && data && data.length > 0) {
+                    const ctx = chartRef.current.getContext('2d');
+                    
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                    
+                    chartInstance.current = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.map(d => d[labelKey]),
+                            datasets: [{
+                                label: label,
+                                data: data.map(d => d[valueKey]),
+                                backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                                borderRadius: 6,
+                                borderSkipped: false
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                return () => {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                };
+            }, [data, labelKey, valueKey, label]);
+            
+            if (!data || data.length === 0) {
+                return <div className="empty-state">No data available</div>;
+            }
+            
+            return <canvas ref={chartRef}></canvas>;
+        };
+        
+        const StackedBarChart = ({ data, label }) => {
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+            
+            useEffect(() => {
+                if (chartRef.current && data && data.length > 0) {
+                    const ctx = chartRef.current.getContext('2d');
+                    
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                    
+                    chartInstance.current = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.map(d => d.week),
+                            datasets: [
+                                {
+                                    label: 'Comments',
+                                    data: data.map(d => d.comments),
+                                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                                    borderRadius: 6,
+                                    borderSkipped: false
+                                },
+                                {
+                                    label: 'Likes',
+                                    data: data.map(d => d.likes),
+                                    backgroundColor: 'rgba(118, 75, 162, 0.8)',
+                                    borderRadius: 6,
+                                    borderSkipped: false
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    stacked: true,
+                                    grid: {
+                                        display: false
+                                    }
+                                },
+                                y: {
+                                    stacked: true,
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'top'
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                return () => {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                };
+            }, [data, label]);
+            
+            if (!data || data.length === 0) {
+                return <div className="empty-state">No data available</div>;
+            }
+            
+            return <canvas ref={chartRef}></canvas>;
+        };
+        
+        const DoughnutChart = ({ data, labelKey, valueKey }) => {
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+            
+            useEffect(() => {
+                if (chartRef.current && data && data.length > 0) {
+                    const ctx = chartRef.current.getContext('2d');
+                    
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                    
+                    const colors = [
+                        '#667eea', '#764ba2', '#f093fb', '#4facfe',
+                        '#43e97b', '#fa709a', '#fee140', '#30cfd0'
+                    ];
+                    
+                    chartInstance.current = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: data.map(d => d[labelKey]),
+                            datasets: [{
+                                data: data.map(d => d[valueKey]),
+                                backgroundColor: colors.slice(0, data.length),
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right'
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                return () => {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                };
+            }, [data, labelKey, valueKey]);
+            
+            if (!data || data.length === 0) {
+                return <div className="empty-state">No data available</div>;
+            }
+            
+            return <canvas ref={chartRef}></canvas>;
+        };
+        
+        const Dashboard = () => {
+            const [activeTab, setActiveTab] = useState('overview');
+            const [loading, setLoading] = useState(true);
+            const [error, setError] = useState(null);
+            const [data, setData] = useState(null);
+            const [lastUpdated, setLastUpdated] = useState(null);
+            
+            const fetchData = async () => {
+                setLoading(true);
+                setError(null);
+                
+                try {
+                    // DAU query - last 30 days
+                    // Use feed_viewed as proxy for active users since session_start isn't implemented yet
+                    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+                    console.log('Debug - Querying DAU from:', thirtyDaysAgo.toISOString());
+                    
+                    const { data: directDau, error: dauError } = await supabaseClient
+                        .from('app_events')
+                        .select('created_at, user_id')
+                        .in('event_name', ['feed_viewed', 'post_created', 'post_liked', 'comment_created', 'search_performed', 'watchlist_item_added'])
+                        .gte('created_at', thirtyDaysAgo.toISOString())
+                        .limit(10000);
+                    
+                    console.log('Debug - DAU query error:', dauError);
+                    console.log('Debug - DAU events fetched:', directDau?.length);
+                    console.log('Debug - Sample DAU events:', directDau?.slice(0, 3));
+                    
+                    const dauMap = {};
+                    directDau?.forEach(event => {
+                        const date = event.created_at.split('T')[0];
+                        if (!dauMap[date]) dauMap[date] = new Set();
+                        dauMap[date].add(event.user_id);
+                    });
+                    
+                    console.log('Debug - DAU dates found:', Object.keys(dauMap).length);
+                    
+                    const dauResult = Object.entries(dauMap).map(([date, users]) => ({
+                        date,
+                        dau: users.size
+                    })).sort((a, b) => a.date.localeCompare(b.date));
+                    
+                    // Onboarding funnel query
+                    const { data: onboardingEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('metadata, user_id')
+                        .eq('event_name', 'onboarding_step_viewed');
+                    
+                    const steps = ['account_info', 'profile_info', 'selection', 'rating'];
+                    const stepUsers = {};
+                    
+                    onboardingEvents?.forEach(event => {
+                        const step = event.metadata?.step;
+                        if (step && steps.includes(step)) {
+                            if (!stepUsers[step]) stepUsers[step] = new Set();
+                            stepUsers[step].add(event.user_id);
+                        }
+                    });
+                    
+                    const { data: completedEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('user_id')
+                        .eq('event_name', 'onboarding_completed');
+                    
+                    stepUsers['completed'] = new Set(completedEvents?.map(e => e.user_id) || []);
+                    
+                    const allSteps = [...steps, 'completed'];
+                    const maxUsers = Math.max(...allSteps.map(s => stepUsers[s]?.size || 0), 1);
+                    const funnelResult = allSteps.map(step => ({
+                        step,
+                        users: stepUsers[step]?.size || 0,
+                        percentage: parseFloat(((stepUsers[step]?.size || 0) / maxUsers * 100).toFixed(1))
+                    }));
+                    
+                    // Session duration query - won't have data until session_end is tracked
+                    const { data: sessions } = await supabaseClient
+                        .from('app_events')
+                        .select('metadata')
+                        .eq('event_name', 'session_end')
+                        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+                    
+                    const buckets = {};
+                    sessions?.forEach(session => {
+                        const bucket = session.metadata?.duration_bucket;
+                        if (bucket) {
+                            buckets[bucket] = (buckets[bucket] || 0) + 1;
+                        }
+                    });
+                    
+                    const total = Object.values(buckets).reduce((a, b) => a + b, 0) || 1;
+                    const sessionResult = Object.entries(buckets).map(([bucket, count]) => ({
+                        bucket,
+                        count,
+                        percentage: parseFloat((count / total * 100).toFixed(1))
+                    }));
+                    
+                    console.log('Debug - Session duration data:', sessionResult.length > 0 ? 'Available' : 'Not tracked yet');
+                    
+                    // Feature usage query
+                    const { data: events } = await supabaseClient
+                        .from('app_events')
+                        .select('feature, user_id')
+                        .not('feature', 'is', null)
+                        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+                    
+                    const features = {};
+                    events?.forEach(event => {
+                        // Skip analytics-related features (internal tracking)
+                        if (event.feature && !event.feature.includes('analytics')) {
+                            if (!features[event.feature]) {
+                                features[event.feature] = { users: new Set(), events: 0 };
+                            }
+                            features[event.feature].users.add(event.user_id);
+                            features[event.feature].events++;
+                        }
+                    });
+                    
+                    const featureResult = Object.entries(features).map(([feature, data]) => ({
+                        feature,
+                        users: data.users.size,
+                        events: data.events,
+                        percentage: data.users.size
+                    })).sort((a, b) => b.users - a.users);
+                    
+                    // Genre data query
+                    const { data: genreEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('metadata, user_id')
+                        .eq('event_name', 'search_result_selected')
+                        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+                    
+                    const genres = {};
+                    genreEvents?.forEach(event => {
+                        const genre = event.metadata?.primary_genre;
+                        if (genre) {
+                            if (!genres[genre]) {
+                                genres[genre] = { users: new Set(), selections: 0 };
+                            }
+                            genres[genre].users.add(event.user_id);
+                            genres[genre].selections++;
+                        }
+                    });
+                    
+                    const genreResult = Object.entries(genres).map(([genre, data]) => ({
+                        genre,
+                        selections: data.selections,
+                        users: data.users.size
+                    })).sort((a, b) => b.selections - a.selections).slice(0, 15);
+                    
+                    // Activation vs Retention query
+                    const { data: activationEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('user_id, metadata')
+                        .eq('event_name', 'activation_snapshot');
+                    
+                    // Use any activity events for retention calculation (since session_start isn't tracked yet)
+                    const { data: activityEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('user_id, created_at')
+                        .in('event_name', ['feed_viewed', 'post_created', 'post_liked', 'comment_created'])
+                        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+                        .limit(10000);
+                    
+                    const userActiveDays = {};
+                    activityEvents?.forEach(event => {
+                        const date = event.created_at.split('T')[0];
+                        if (!userActiveDays[event.user_id]) {
+                            userActiveDays[event.user_id] = new Set();
+                        }
+                        userActiveDays[event.user_id].add(date);
+                    });
+                    
+                    console.log('Debug - Users with activity in last 7 days:', Object.keys(userActiveDays).length);
+                    
+                    const segments = {
+                        'High Follows (3+)': { users: [], days: [] },
+                        'Low Follows (1-2)': { users: [], days: [] },
+                        'No Follows': { users: [], days: [] }
+                    };
+                    
+                    activationEvents?.forEach(event => {
+                        const follows = event.metadata?.follows_count || 0;
+                        const activeDays = userActiveDays[event.user_id]?.size || 0;
+                        
+                        let segment;
+                        if (follows >= 3) segment = 'High Follows (3+)';
+                        else if (follows >= 1) segment = 'Low Follows (1-2)';
+                        else segment = 'No Follows';
+                        
+                        segments[segment].users.push(event.user_id);
+                        segments[segment].days.push(activeDays);
+                    });
+                    
+                    console.log('Debug - Activation snapshot events:', activationEvents?.length);
+                    console.log('Debug - Segment breakdown:', {
+                        'High Follows': segments['High Follows (3+)'].users.length,
+                        'Low Follows': segments['Low Follows (1-2)'].users.length,
+                        'No Follows': segments['No Follows'].users.length
+                    });
+                    
+                    const activationResult = Object.entries(segments)
+                        .map(([segment, data]) => ({
+                            segment,
+                            users: data.users.length,
+                            avgDays: data.days.length > 0 
+                                ? data.days.reduce((a, b) => a + b, 0) / data.days.length 
+                                : 0,
+                            description: segment === 'No Follows' 
+                                ? 'Users who completed onboarding but followed 0 people' 
+                                : segment === 'Low Follows (1-2)'
+                                ? 'Users who followed 1-2 people during onboarding'
+                                : 'Users who followed 3+ people during onboarding'
+                        }))
+                        .filter(s => s.users > 0)
+                        .sort((a, b) => b.avgDays - a.avgDays);
+                    
+                    // Rec actions query
+                    const { data: recEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('metadata')
+                        .eq('event_name', 'rec_action')
+                        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+                    
+                    const recActions = {};
+                    recEvents?.forEach(event => {
+                        const action = event.metadata?.action;
+                        if (action) {
+                            recActions[action] = (recActions[action] || 0) + 1;
+                        }
+                    });
+                    
+                    const recTotal = Object.values(recActions).reduce((a, b) => a + b, 0) || 1;
+                    const recResult = Object.entries(recActions).map(([action, count]) => ({
+                        action,
+                        count,
+                        percentage: parseFloat((count / recTotal * 100).toFixed(1))
+                    })).sort((a, b) => b.count - a.count);
+                    
+                    // Power users query
+                    const { data: powerEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('user_id, metadata')
+                        .eq('event_name', 'power_user_marker')
+                        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+                    
+                    const powerThresholds = {};
+                    powerEvents?.forEach(event => {
+                        const threshold = event.metadata?.threshold;
+                        if (threshold) {
+                            if (!powerThresholds[threshold]) {
+                                powerThresholds[threshold] = new Set();
+                            }
+                            powerThresholds[threshold].add(event.user_id);
+                        }
+                    });
+                    
+                    const powerResult = Object.entries(powerThresholds).map(([threshold, users]) => ({
+                        threshold,
+                        users: users.size
+                    })).sort((a, b) => b.users - a.users);
+                    
+                    // Retention cohorts query
+                    const { data: retentionEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('user_id, metadata')
+                        .eq('event_name', 'return_after_idle')
+                        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+                    
+                    const cohorts = {};
+                    retentionEvents?.forEach(event => {
+                        const threshold = event.metadata?.threshold;
+                        const hoursIdle = parseInt(event.metadata?.hours_idle) || 0;
+                        
+                        if (threshold) {
+                            if (!cohorts[threshold]) {
+                                cohorts[threshold] = { returns: 0, users: new Set(), hours: [] };
+                            }
+                            cohorts[threshold].returns++;
+                            cohorts[threshold].users.add(event.user_id);
+                            cohorts[threshold].hours.push(hoursIdle);
+                        }
+                    });
+                    
+                    const retentionResult = Object.entries(cohorts).map(([threshold, data]) => ({
+                        threshold,
+                        returns: data.returns,
+                        users: data.users.size,
+                        avgHours: data.hours.length > 0 
+                            ? data.hours.reduce((a, b) => a + b, 0) / data.hours.length 
+                            : 0
+                    })).sort((a, b) => a.threshold.localeCompare(b.threshold));
+                    
+                    // NEW QUERIES FOR ADDITIONAL METRICS
+                    
+                    // Sign ups over time (by week)
+                    const { data: signupEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('created_at, user_id')
+                        .eq('event_name', 'onboarding_completed')
+                        .order('created_at', { ascending: true });
+                    
+                    const signupsByWeek = {};
+                    signupEvents?.forEach(event => {
+                        const date = new Date(event.created_at);
+                        const weekStart = new Date(date);
+                        weekStart.setDate(date.getDate() - date.getDay()); // Start of week (Sunday)
+                        const weekKey = weekStart.toISOString().split('T')[0];
+                        signupsByWeek[weekKey] = (signupsByWeek[weekKey] || 0) + 1;
+                    });
+                    
+                    const signupsResult = Object.entries(signupsByWeek)
+                        .map(([week, count]) => ({ week, signups: count }))
+                        .sort((a, b) => a.week.localeCompare(b.week));
+                    
+                    // Posts per week
+                    const { data: postEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('created_at, user_id')
+                        .eq('event_name', 'post_created')
+                        .order('created_at', { ascending: true });
+                    
+                    const postsByDay = {};
+                    const postsByDayByUser = {};
+                    
+                    postEvents?.forEach(event => {
+                        const date = new Date(event.created_at);
+                        const dateKey = date.toISOString().split('T')[0];
+                        const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+                        
+                        if (!postsByDay[dateKey]) {
+                            postsByDay[dateKey] = { count: 0, dayOfWeek, users: new Set() };
+                        }
+                        postsByDay[dateKey].count++;
+                        postsByDay[dateKey].users.add(event.user_id);
+                    });
+                    
+                    const postsByDayResult = Object.entries(postsByDay)
+                        .map(([date, data]) => ({
+                            date,
+                            dayOfWeek: data.dayOfWeek,
+                            posts: data.count,
+                            activeUsers: data.users.size,
+                            postsPerUser: data.users.size ? (data.count / data.users.size).toFixed(2) : 0,
+                            label: `${data.dayOfWeek} ${new Date(date).getMonth() + 1}/${new Date(date).getDate()}`
+                        }))
+                        .sort((a, b) => a.date.localeCompare(b.date))
+                        .slice(-30); // Last 30 days for readability
+                    
+                    // Comments and likes per week
+                    const { data: commentEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('created_at')
+                        .eq('event_name', 'comment_created')
+                        .order('created_at', { ascending: true });
+                    
+                    const { data: likeEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('created_at')
+                        .eq('event_name', 'post_liked')
+                        .order('created_at', { ascending: true });
+                    
+                    const engagementByWeek = {};
+                    
+                    commentEvents?.forEach(event => {
+                        const date = new Date(event.created_at);
+                        const weekStart = new Date(date);
+                        weekStart.setDate(date.getDate() - date.getDay());
+                        const weekKey = weekStart.toISOString().split('T')[0];
+                        
+                        if (!engagementByWeek[weekKey]) {
+                            engagementByWeek[weekKey] = { comments: 0, likes: 0 };
+                        }
+                        engagementByWeek[weekKey].comments++;
+                    });
+                    
+                    likeEvents?.forEach(event => {
+                        const date = new Date(event.created_at);
+                        const weekStart = new Date(date);
+                        weekStart.setDate(date.getDate() - date.getDay());
+                        const weekKey = weekStart.toISOString().split('T')[0];
+                        
+                        if (!engagementByWeek[weekKey]) {
+                            engagementByWeek[weekKey] = { comments: 0, likes: 0 };
+                        }
+                        engagementByWeek[weekKey].likes++;
+                    });
+                    
+                    const engagementResult = Object.entries(engagementByWeek)
+                        .map(([week, data]) => ({
+                            week,
+                            comments: data.comments,
+                            likes: data.likes,
+                            total: data.comments + data.likes
+                        }))
+                        .sort((a, b) => a.week.localeCompare(b.week));
+                    
+                    // Movies added to lists per week per user
+                    const { data: listEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('created_at, user_id')
+                        .eq('event_name', 'watchlist_item_added')
+                        .order('created_at', { ascending: true });
+                    
+                    const listsByWeek = {};
+                    const listsByWeekByUser = {};
+                    
+                    listEvents?.forEach(event => {
+                        const date = new Date(event.created_at);
+                        const weekStart = new Date(date);
+                        weekStart.setDate(date.getDate() - date.getDay());
+                        const weekKey = weekStart.toISOString().split('T')[0];
+                        
+                        listsByWeek[weekKey] = (listsByWeek[weekKey] || 0) + 1;
+                        
+                        if (!listsByWeekByUser[weekKey]) {
+                            listsByWeekByUser[weekKey] = new Set();
+                        }
+                        listsByWeekByUser[weekKey].add(event.user_id);
+                    });
+                    
+                    const listsResult = Object.entries(listsByWeek)
+                        .map(([week, count]) => ({
+                            week,
+                            itemsAdded: count,
+                            activeUsers: listsByWeekByUser[week]?.size || 0,
+                            itemsPerUser: listsByWeekByUser[week]?.size 
+                                ? (count / listsByWeekByUser[week].size).toFixed(2)
+                                : 0
+                        }))
+                        .sort((a, b) => a.week.localeCompare(b.week));
+                    
+                    // Recommendation usage per week
+                    const { data: watchNowEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('created_at, user_id')
+                        .eq('event_name', 'watch_now_opened')
+                        .order('created_at', { ascending: true });
+                    
+                    const recsByWeek = {};
+                    const recsByWeekByUser = {};
+                    
+                    watchNowEvents?.forEach(event => {
+                        const date = new Date(event.created_at);
+                        const weekStart = new Date(date);
+                        weekStart.setDate(date.getDate() - date.getDay());
+                        const weekKey = weekStart.toISOString().split('T')[0];
+                        
+                        recsByWeek[weekKey] = (recsByWeek[weekKey] || 0) + 1;
+                        
+                        if (!recsByWeekByUser[weekKey]) {
+                            recsByWeekByUser[weekKey] = new Set();
+                        }
+                        recsByWeekByUser[weekKey].add(event.user_id);
+                    });
+                    
+                    const recsResult = Object.entries(recsByWeek)
+                        .map(([week, count]) => ({
+                            week,
+                            opens: count,
+                            uniqueUsers: recsByWeekByUser[week]?.size || 0,
+                            opensPerUser: recsByWeekByUser[week]?.size 
+                                ? (count / recsByWeekByUser[week].size).toFixed(2)
+                                : 0
+                        }))
+                        .sort((a, b) => a.week.localeCompare(b.week));
+                    
+                    // Weekly app visits across all users and per user
+                    const { data: allSessionStarts } = await supabaseClient
+                        .from('app_events')
+                        .select('created_at, user_id')
+                        .eq('event_name', 'session_start')
+                        .order('created_at', { ascending: true });
+                    
+                    const visitsByWeek = {};
+                    const visitsByWeekByUser = {};
+                    
+                    allSessionStarts?.forEach(event => {
+                        const date = new Date(event.created_at);
+                        const weekStart = new Date(date);
+                        weekStart.setDate(date.getDate() - date.getDay());
+                        const weekKey = weekStart.toISOString().split('T')[0];
+                        
+                        visitsByWeek[weekKey] = (visitsByWeek[weekKey] || 0) + 1;
+                        
+                        if (!visitsByWeekByUser[weekKey]) {
+                            visitsByWeekByUser[weekKey] = new Set();
+                        }
+                        visitsByWeekByUser[weekKey].add(event.user_id);
+                    });
+                    
+                    const visitsResult = Object.entries(visitsByWeek)
+                        .map(([week, count]) => ({
+                            week,
+                            totalVisits: count,
+                            uniqueUsers: visitsByWeekByUser[week]?.size || 0,
+                            visitsPerUser: visitsByWeekByUser[week]?.size 
+                                ? (count / visitsByWeekByUser[week].size).toFixed(2)
+                                : 0
+                        }))
+                        .sort((a, b) => a.week.localeCompare(b.week));
+                    
+                    // Journal entries per week - from actual journal_entries table
+                    const { data: journalEntries } = await supabaseClient
+                        .from('journal_entries')
+                        .select('created_at, watcher_id')
+                        .order('created_at', { ascending: true })
+                        .limit(10000);
+                    
+                    console.log('Debug - Journal entries fetched:', journalEntries?.length);
+                    
+                    const journalsByWeek = {};
+                    const journalsByWeekByUser = {};
+                    
+                    journalEntries?.forEach(entry => {
+                        const date = new Date(entry.created_at);
+                        const weekStart = new Date(date);
+                        weekStart.setDate(date.getDate() - date.getDay());
+                        const weekKey = weekStart.toISOString().split('T')[0];
+                        
+                        journalsByWeek[weekKey] = (journalsByWeek[weekKey] || 0) + 1;
+                        
+                        if (!journalsByWeekByUser[weekKey]) {
+                            journalsByWeekByUser[weekKey] = new Set();
+                        }
+                        journalsByWeekByUser[weekKey].add(entry.watcher_id);
+                    });
+                    
+                    const journalsResult = Object.entries(journalsByWeek)
+                        .map(([week, count]) => ({
+                            week,
+                            entries: count,
+                            activeUsers: journalsByWeekByUser[week]?.size || 0,
+                            entriesPerUser: journalsByWeekByUser[week]?.size 
+                                ? (count / journalsByWeekByUser[week].size).toFixed(2)
+                                : 0
+                        }))
+                        .sort((a, b) => a.week.localeCompare(b.week));
+                    
+                    // Get total unique users - use a more efficient approach
+                    // First, try to get a direct count of distinct users
+                    const { data: distinctUsers, error: distinctError } = await supabaseClient
+                        .rpc('count_distinct_users');
+                    
+                    let totalUniqueUsers = 60; // fallback
+                    let mauUsers = 0;
+                    
+                    if (distinctError || !distinctUsers) {
+                        // Fallback: fetch all user_ids (remove default limit)
+                        const { data: allUserEvents } = await supabaseClient
+                            .from('app_events')
+                            .select('user_id')
+                            .not('user_id', 'is', null)
+                            .limit(10000); // Set high limit to get all users
+                        
+                        const allUniqueUserIds = new Set(allUserEvents?.map(e => e.user_id) || []);
+                        totalUniqueUsers = allUniqueUserIds.size;
+                        
+                        console.log('Debug - Total events fetched:', allUserEvents?.length);
+                        console.log('Debug - Total unique users:', totalUniqueUsers);
+                        console.log('Debug - Sample user IDs:', Array.from(allUniqueUserIds).slice(0, 5));
+                    } else {
+                        totalUniqueUsers = distinctUsers;
+                        console.log('Debug - Total unique users (from RPC):', totalUniqueUsers);
+                    }
+                    
+                    // Get MAU (users with any activity in last 30 days)
+                    const { data: mauEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('user_id')
+                        .in('event_name', ['feed_viewed', 'post_created', 'post_liked', 'comment_created', 'search_performed'])
+                        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+                        .limit(10000);
+                    
+                    mauUsers = new Set(mauEvents?.map(e => e.user_id).filter(id => id != null) || []).size;
+                    
+                    console.log('Debug - MAU:', mauUsers);
+                    
+                    // Get WAU (users with any activity in last 7 days)
+                    const { data: wauEvents } = await supabaseClient
+                        .from('app_events')
+                        .select('user_id')
+                        .in('event_name', ['feed_viewed', 'post_created', 'post_liked', 'comment_created', 'search_performed'])
+                        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+                        .limit(10000);
+                    
+                    const wauUsers = new Set(wauEvents?.map(e => e.user_id).filter(id => id != null) || []).size;
+                    
+                    console.log('Debug - WAU:', wauUsers);
+                    
+                    setData({
+                        dauData: dauResult || [],
+                        funnelData: funnelResult || [],
+                        sessionDuration: sessionResult || [],
+                        featureUsage: featureResult || [],
+                        genreData: genreResult || [],
+                        activationRetention: activationResult || [],
+                        recActions: recResult || [],
+                        powerUsers: powerResult || [],
+                        retentionCohorts: retentionResult || [],
+                        signupsOverTime: signupsResult || [],
+                        postsPerWeek: postsByDayResult || [],
+                        engagementPerWeek: engagementResult || [],
+                        listsPerWeek: listsResult || [],
+                        recsPerWeek: recsResult || [],
+                        visitsPerWeek: visitsResult || [],
+                        journalsPerWeek: journalsResult || [],
+                        summary: {
+                            totalUsers: totalUniqueUsers,
+                            dau: dauResult?.[dauResult.length - 1]?.dau || 0,
+                            wau: wauUsers,
+                            mau: mauUsers,
+                            completionRate: funnelResult?.find(f => f.step === 'completed')?.percentage || 0
+                        }
+                    });
+                    
+                    setLastUpdated(new Date());
+                    setLoading(false);
+                } catch (err) {
+                    console.error('Error fetching data:', err);
+                    setError(err.message);
+                    setLoading(false);
+                }
+            };
+            
+            useEffect(() => {
+                fetchData();
+            }, []);
+            
+            if (loading) {
+                return (
+                    <div className="dashboard">
+                        <div className="header">
+                            <div className="header-left">
+                                <h1>🎬 UnScene Beta Analytics</h1>
+                                <p>Loading data from Supabase...</p>
+                            </div>
+                        </div>
+                        <div className="loading">
+                            <div className="loading-spinner"></div>
+                            <p>Fetching analytics data...</p>
+                        </div>
+                    </div>
+                );
+            }
+            
+            if (error) {
+                return (
+                    <div className="dashboard">
+                        <div className="header">
+                            <div className="header-left">
+                                <h1>🎬 UnScene Beta Analytics</h1>
+                                <p>Version Dolphin • 100 User Beta</p>
+                            </div>
+                            <button className="refresh-btn" onClick={fetchData}>
+                                🔄 Retry
+                            </button>
+                        </div>
+                        <div className="error">
+                            <h3>⚠️ Error Loading Data</h3>
+                            <p>{error}</p>
+                            <p style={{ marginTop: '10px', fontSize: '13px', color: '#718096' }}>
+                                This might be due to RLS policies. Make sure the dashboard has appropriate access to query the app_events table.
+                            </p>
+                        </div>
+                    </div>
+                );
+            }
+            
+            return (
+                <div className="dashboard">
+                    <div className="header">
+                        <div className="header-left">
+                            <h1>🎬 UnScene Beta Analytics</h1>
+                            <p>Version Dolphin • Last updated: {lastUpdated?.toLocaleString()}</p>
+                        </div>
+                        <button className="refresh-btn" onClick={fetchData}>
+                            🔄 Refresh Data
+                        </button>
+                    </div>
+                    
+                    <div className="tabs">
+                        <button 
+                            className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('overview')}
+                        >
+                            Overview
+                        </button>
+                        <button 
+                            className={`tab ${activeTab === 'growth' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('growth')}
+                        >
+                            Growth
+                        </button>
+                        <button 
+                            className={`tab ${activeTab === 'engagement' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('engagement')}
+                        >
+                            Engagement
+                        </button>
+                        <button 
+                            className={`tab ${activeTab === 'features' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('features')}
+                        >
+                            Features
+                        </button>
+                        <button 
+                            className={`tab ${activeTab === 'retention' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('retention')}
+                        >
+                            Retention
+                        </button>
+                    </div>
+                    
+                    {activeTab === 'overview' && (
+                        <>
+                            <div className="stats-grid">
+                                <div className="stat-card">
+                                    <div className="stat-label">Total Users</div>
+                                    <div className="stat-value">{data.summary.totalUsers}</div>
+                                    <div className="stat-change neutral">Beta capacity</div>
+                                </div>
+                                
+                                <div className="stat-card">
+                                    <div className="stat-label">Daily Active Users</div>
+                                    <div className="stat-value">{data.summary.dau}</div>
+                                    <div className="stat-change neutral">Today</div>
+                                </div>
+                                
+                                <div className="stat-card">
+                                    <div className="stat-label">Weekly Active Users</div>
+                                    <div className="stat-value">{data.summary.wau}</div>
+                                    <div className="stat-change neutral">Last 7 days</div>
+                                </div>
+                                
+                                <div className="stat-card">
+                                    <div className="stat-label">Monthly Active Users</div>
+                                    <div className="stat-value">{data.summary.mau}</div>
+                                    <div className="stat-change neutral">Last 30 days</div>
+                                </div>
+                            </div>
+                            
+                            <div className="chart-grid">
+                                <div className="chart-card">
+                                    <h3>Daily Active Users (Last 30 Days)</h3>
+                                    <p style={{ fontSize: '12px', color: '#718096', marginBottom: '10px' }}>
+                                        Based on user activity (feed views, posts, likes, comments, etc.)
+                                    </p>
+                                    <div className="chart-container">
+                                        <LineChart 
+                                            data={data.dauData} 
+                                            labelKey="date" 
+                                            valueKey="dau"
+                                            label="DAU" 
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="chart-card">
+                                    <h3>Onboarding Funnel</h3>
+                                    <div className="chart-container">
+                                        <BarChart 
+                                            data={data.funnelData} 
+                                            labelKey="step" 
+                                            valueKey="users"
+                                            label="Users"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {data.funnelData && data.funnelData.length > 0 && (
+                                <div className="table-card">
+                                    <h3>Onboarding Funnel Details</h3>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Step</th>
+                                                <th>Users</th>
+                                                <th>Completion Rate</th>
+                                                <th>Drop-off</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.funnelData.map((step, idx) => (
+                                                <tr key={step.step}>
+                                                    <td>{step.step.replace(/_/g, ' ').toUpperCase()}</td>
+                                                    <td>{step.users}</td>
+                                                    <td>
+                                                        {step.percentage}%
+                                                        <div className="progress-bar">
+                                                            <div 
+                                                                className="progress-fill" 
+                                                                style={{ width: `${step.percentage}%` }}
+                                                            ></div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        {idx > 0 ? 
+                                                            `${data.funnelData[idx-1].users - step.users} users` : 
+                                                            '-'}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </>
+                    )}
+                    
+                    {activeTab === 'growth' && (
+                        <>
+                            <div className="chart-grid">
+                                {data.signupsOverTime && data.signupsOverTime.length > 0 && (
+                                    <div className="chart-card">
+                                        <h3>Sign-ups Over Time (Weekly)</h3>
+                                        <div className="chart-container">
+                                            <LineChart 
+                                                data={data.signupsOverTime} 
+                                                labelKey="week" 
+                                                valueKey="signups"
+                                                label="Sign-ups"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {data.visitsPerWeek && data.visitsPerWeek.length > 0 && (
+                                    <div className="chart-card">
+                                        <h3>Weekly App Visits</h3>
+                                        <div className="chart-container">
+                                            <LineChart 
+                                                data={data.visitsPerWeek} 
+                                                labelKey="week" 
+                                                valueKey="totalVisits"
+                                                label="Total Visits"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <div className="chart-grid">
+                                {data.postsPerWeek && data.postsPerWeek.length > 0 && (
+                                    <div className="chart-card">
+                                        <h3>Posts Per Day (Last 30 Days)</h3>
+                                        <p style={{ fontSize: '12px', color: '#718096', marginBottom: '10px' }}>
+                                            View by day to spot weekend spikes
+                                        </p>
+                                        <div className="chart-container">
+                                            <BarChart 
+                                                data={data.postsPerWeek} 
+                                                labelKey="label" 
+                                                valueKey="posts"
+                                                label="Total Posts"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {data.journalsPerWeek && data.journalsPerWeek.length > 0 ? (
+                                    <div className="chart-card">
+                                        <h3>Journal Entries Per Week</h3>
+                                        <div className="chart-container">
+                                            <LineChart 
+                                                data={data.journalsPerWeek} 
+                                                labelKey="week" 
+                                                valueKey="entries"
+                                                label="Journal Entries"
+                                            />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="chart-card">
+                                        <h3>Journal Entries Per Week</h3>
+                                        <div className="empty-state">
+                                            <p>No journal entries tracked yet</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {data.postsPerWeek && data.postsPerWeek.length > 0 && (
+                                <div className="table-card">
+                                    <h3>Posts Per Day - Recent Activity</h3>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Day</th>
+                                                <th>Total Posts</th>
+                                                <th>Active Users</th>
+                                                <th>Posts Per User</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.postsPerWeek.slice(-14).reverse().map(day => (
+                                                <tr key={day.date} style={{ 
+                                                    background: (day.dayOfWeek === 'Sat' || day.dayOfWeek === 'Sun') 
+                                                        ? 'rgba(102, 126, 234, 0.05)' 
+                                                        : 'transparent' 
+                                                }}>
+                                                    <td>{new Date(day.date).toLocaleDateString()}</td>
+                                                    <td><strong>{day.dayOfWeek}</strong></td>
+                                                    <td>{day.posts}</td>
+                                                    <td>{day.activeUsers}</td>
+                                                    <td>{day.postsPerUser}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                            
+                            <div className="chart-grid">
+                                {data.engagementPerWeek && data.engagementPerWeek.length > 0 && (
+                                    <div className="chart-card">
+                                        <h3>Comments & Likes Per Week</h3>
+                                        <p style={{ fontSize: '12px', color: '#718096', marginBottom: '10px' }}>
+                                            Stacked to show breakdown
+                                        </p>
+                                        <div className="chart-container">
+                                            <StackedBarChart 
+                                                data={data.engagementPerWeek} 
+                                                label="Engagement"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {data.listsPerWeek && data.listsPerWeek.length > 0 && (
+                                    <div className="chart-card">
+                                        <h3>Items Added to Lists Per Week</h3>
+                                        <div className="chart-container">
+                                            <LineChart 
+                                                data={data.listsPerWeek} 
+                                                labelKey="week" 
+                                                valueKey="itemsAdded"
+                                                label="Items Added"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {data.recsPerWeek && data.recsPerWeek.length > 0 && (
+                                <div className="chart-card">
+                                    <h3>Watch Now Opens Per Week</h3>
+                                    <div className="chart-container">
+                                        <LineChart 
+                                            data={data.recsPerWeek} 
+                                            labelKey="week" 
+                                            valueKey="opens"
+                                            label="Watch Now Opens"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {data.engagementPerWeek && data.engagementPerWeek.length > 0 && (
+                                <div className="table-card">
+                                    <h3>Engagement Breakdown (Last 8 Weeks)</h3>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Week</th>
+                                                <th>Comments</th>
+                                                <th>Likes</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.engagementPerWeek.slice(-8).reverse().map(week => (
+                                                <tr key={week.week}>
+                                                    <td>{new Date(week.week).toLocaleDateString()}</td>
+                                                    <td>{week.comments}</td>
+                                                    <td>{week.likes}</td>
+                                                    <td>{week.total}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                            
+                            <div className="chart-grid">
+                                {data.recsPerWeek && data.recsPerWeek.length > 0 && (
+                                    <div className="chart-card">
+                                        <h3>Watch Now Opens Per Week</h3>
+                                        <div className="chart-container">
+                                            <LineChart 
+                                                data={data.recsPerWeek} 
+                                                labelKey="week" 
+                                                valueKey="opens"
+                                                label="Watch Now Opens"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {data.journalsPerWeek && data.journalsPerWeek.length > 0 && (
+                                    <div className="chart-card">
+                                        <h3>Journal Entries Per Week</h3>
+                                        <div className="chart-container">
+                                            <LineChart 
+                                                data={data.journalsPerWeek} 
+                                                labelKey="week" 
+                                                valueKey="entries"
+                                                label="Journal Entries"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            
+                            {data.engagementPerWeek && data.engagementPerWeek.length > 0 && (
+                                <div className="table-card">
+                                    <h3>Engagement Breakdown (Last 8 Weeks)</h3>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Week</th>
+                                                <th>Comments</th>
+                                                <th>Likes</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.engagementPerWeek.slice(-8).reverse().map(week => (
+                                                <tr key={week.week}>
+                                                    <td>{new Date(week.week).toLocaleDateString()}</td>
+                                                    <td>{week.comments}</td>
+                                                    <td>{week.likes}</td>
+                                                    <td>{week.total}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                            
+                            {data.visitsPerWeek && data.visitsPerWeek.length > 0 && (
+                                <div className="table-card">
+                                    <h3>Weekly App Visits - Detailed (Last 8 Weeks)</h3>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Week</th>
+                                                <th>Total Visits</th>
+                                                <th>Unique Users</th>
+                                                <th>Visits Per User</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.visitsPerWeek.slice(-8).reverse().map(week => (
+                                                <tr key={week.week}>
+                                                    <td>{new Date(week.week).toLocaleDateString()}</td>
+                                                    <td>{week.totalVisits}</td>
+                                                    <td>{week.uniqueUsers}</td>
+                                                    <td>{week.visitsPerUser}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                            
+                            {data.listsPerWeek && data.listsPerWeek.length > 0 && (
+                                <div className="table-card">
+                                    <h3>List Activity Per Week (Last 8 Weeks)</h3>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Week</th>
+                                                <th>Items Added</th>
+                                                <th>Active Users</th>
+                                                <th>Items Per User</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.listsPerWeek.slice(-8).reverse().map(week => (
+                                                <tr key={week.week}>
+                                                    <td>{new Date(week.week).toLocaleDateString()}</td>
+                                                    <td>{week.itemsAdded}</td>
+                                                    <td>{week.activeUsers}</td>
+                                                    <td>{week.itemsPerUser}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                            
+                            {data.journalsPerWeek && data.journalsPerWeek.length > 0 && (
+                                <div className="table-card">
+                                    <h3>Journal Activity Per Week (Last 8 Weeks)</h3>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Week</th>
+                                                <th>Entries</th>
+                                                <th>Active Users</th>
+                                                <th>Entries Per User</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.journalsPerWeek.slice(-8).reverse().map(week => (
+                                                <tr key={week.week}>
+                                                    <td>{new Date(week.week).toLocaleDateString()}</td>
+                                                    <td>{week.entries}</td>
+                                                    <td>{week.activeUsers}</td>
+                                                    <td>{week.entriesPerUser}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </>
+                    )}
+                    
+                    {activeTab === 'engagement' && (
+                        <>
+                            {data.sessionDuration && data.sessionDuration.length > 0 && (
+                                <div className="chart-grid">
+                                    <div className="chart-card">
+                                        <h3>Session Duration Distribution</h3>
+                                        <div className="chart-container">
+                                            <DoughnutChart 
+                                                data={data.sessionDuration} 
+                                                labelKey="bucket" 
+                                                valueKey="count"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    {data.activationRetention && data.activationRetention.length > 0 && (
+                                        <div className="chart-card">
+                                            <h3>Activation Quality vs Retention</h3>
+                                            <div className="chart-container">
+                                                <BarChart 
+                                                    data={data.activationRetention} 
+                                                    labelKey="segment" 
+                                                    valueKey="avgDays"
+                                                    label="Avg Active Days"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            
+                            {data.activationRetention && data.activationRetention.length > 0 && (
+                                <div className="table-card">
+                                    <h3>Activation Segments & Stickiness</h3>
+                                    <p style={{ fontSize: '13px', color: '#718096', marginBottom: '15px' }}>
+                                        Based on follows during onboarding. Higher follows = better retention.
+                                        <br/>
+                                        <strong>"No Follows"</strong> = Users who completed onboarding but didn't follow anyone (may indicate onboarding friction or skipped step)
+                                    </p>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Segment</th>
+                                                <th>Users</th>
+                                                <th>Avg Active Days (7d)</th>
+                                                <th>Stickiness</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.activationRetention.map(segment => (
+                                                <tr key={segment.segment}>
+                                                    <td>{segment.segment}</td>
+                                                    <td>{segment.users}</td>
+                                                    <td>{segment.avgDays?.toFixed(1) || 0}</td>
+                                                    <td>
+                                                        <span className="metric-badge">
+                                                            {segment.avgDays >= 5 ? 'High' : 
+                                                             segment.avgDays >= 3 ? 'Medium' : 'Low'}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                            
+                            {data.retentionCohorts && data.retentionCohorts.length > 0 && (
+                                <div className="table-card">
+                                    <h3>Return After Idle (Retention Cohorts)</h3>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Idle Threshold</th>
+                                                <th>Returns</th>
+                                                <th>Unique Users</th>
+                                                <th>Avg Hours Idle</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.retentionCohorts.map(cohort => (
+                                                <tr key={cohort.threshold}>
+                                                    <td>{cohort.threshold}</td>
+                                                    <td>{cohort.returns}</td>
+                                                    <td>{cohort.users}</td>
+                                                    <td>{cohort.avgHours?.toFixed(1) || 0}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </>
+                    )}
+                    
+                    {activeTab === 'features' && (
+                        <>
+                            {data.featureUsage && data.featureUsage.length > 0 && (
+                                <>
+                                    <div className="chart-grid">
+                                        <div className="chart-card">
+                                            <h3>Feature Usage (Unique Users)</h3>
+                                            <div className="chart-container">
+                                                <BarChart 
+                                                    data={data.featureUsage} 
+                                                    labelKey="feature" 
+                                                    valueKey="users"
+                                                    label="Unique Users"
+                                                />
+                                            </div>
+                                        </div>
+                                        
+                                        {data.genreData && data.genreData.length > 0 && (
+                                            <div className="chart-card">
+                                                <h3>Top Genres (Search Selections)</h3>
+                                                <div className="chart-container">
+                                                    <BarChart 
+                                                        data={data.genreData} 
+                                                        labelKey="genre" 
+                                                        valueKey="selections"
+                                                        label="Selections"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    <div className="table-card">
+                                        <h3>Feature Adoption Ranking</h3>
+                                        <p style={{ fontSize: '13px', color: '#718096', marginBottom: '15px' }}>
+                                            User-facing features only (analytics/internal tracking excluded)
+                                        </p>
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Feature</th>
+                                                    <th>Unique Users</th>
+                                                    <th>Total Events</th>
+                                                    <th>Events per User</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {data.featureUsage.map(feature => (
+                                                    <tr key={feature.feature}>
+                                                        <td>{feature.feature.replace(/_/g, ' ').toUpperCase()}</td>
+                                                        <td>{feature.users}</td>
+                                                        <td>{feature.events}</td>
+                                                        <td>{(feature.events / feature.users).toFixed(1)}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </>
+                            )}
+                            
+                            {data.recActions && data.recActions.length > 0 && (
+                                <div className="chart-grid">
+                                    <div className="chart-card">
+                                        <h3>Recommendation Actions</h3>
+                                        <div className="chart-container">
+                                            <DoughnutChart 
+                                                data={data.recActions} 
+                                                labelKey="action" 
+                                                valueKey="count"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
+                    
+                    {activeTab === 'retention' && (
+                        <>
+                            {data.powerUsers && data.powerUsers.length > 0 && (
+                                <div className="stats-grid">
+                                    {data.powerUsers.map(pu => (
+                                        <div className="stat-card" key={pu.threshold}>
+                                            <div className="stat-label">{pu.threshold?.replace(/_/g, ' ').toUpperCase()}</div>
+                                            <div className="stat-value">{pu.users}</div>
+                                            <div className="stat-change positive">Power Users</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            
+                            {data.genreData && data.genreData.length > 0 && (
+                                <div className="table-card">
+                                    <h3>Content Genre Intelligence</h3>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Genre</th>
+                                                <th>Selections</th>
+                                                <th>Unique Users</th>
+                                                <th>Avg per User</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.genreData.map(genre => (
+                                                <tr key={genre.genre}>
+                                                    <td>{genre.genre}</td>
+                                                    <td>{genre.selections}</td>
+                                                    <td>{genre.users}</td>
+                                                    <td>{(genre.selections / genre.users).toFixed(1)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            );
+        };
+        
+        ReactDOM.render(<Dashboard />, document.getElementById('root'));
+    </script>
+</body>
+</html>
