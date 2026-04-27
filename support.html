@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnScene | Support and Contact</title>
+    <link rel="icon" type="image/png" href="UnSceneLogo.png">
+    <style>
+        :root {
+            --primary-blue: #b5ccee;
+            --text-dark: #ffffff;
+            --text-light: #b0b0b0;
+            --background: #303549;
+            --card: rgba(48, 53, 73, 0.8);
+            --border: rgba(181, 204, 238, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+            background: linear-gradient(135deg, #303549 0%, #3a4057 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(12px);
+            background: rgba(48, 53, 73, 0.9);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 8%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 0.5px;
+        }
+
+        .back-link {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            color: var(--primary-blue);
+        }
+
+        main {
+            padding: 2.5rem 8%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 2rem;
+            letter-spacing: 0.5px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-top: 2rem;
+            color: var(--primary-blue);
+        }
+
+        p, li {
+            color: var(--text-light);
+        }
+
+        a {
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .last-updated {
+            margin: 0.5rem 0 1.5rem;
+            color: var(--text-light);
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .cta-box {
+            margin-top: 1.25rem;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(181, 204, 238, 0.06);
+        }
+
+        @media (max-width: 768px) {
+            main {
+                padding: 2rem 5%;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a class="logo" href="index.html">UnScene</a>
+        <a class="back-link" href="index.html">Back to Home</a>
+    </header>
+
+    <main>
+        <div class="card">
+            <h1>Support and Contact</h1>
+            <div class="last-updated"><strong>Last Updated:</strong> April 2026</div>
+
+            <h2>Contact Email</h2>
+            <div class="cta-box">
+                <p style="margin: 0;">
+                    For marketing inquiries, support, collaborations, partnerships, press, or anything else, email:
+                    <a href="mailto:unscene.app@gmail.com">unscene.app@gmail.com</a>
+                </p>
+            </div>
+
+            <h2>What We Can Help With</h2>
+            <ul>
+                <li>Account and login issues</li>
+                <li>Bug reports and troubleshooting</li>
+                <li>Feature requests and product feedback</li>
+                <li>Marketing, press, and media inquiries</li>
+                <li>Collaborations and partnerships</li>
+            </ul>
+
+            <h2>Tips for Faster Help</h2>
+            <ul>
+                <li>Include your device model and OS version (iOS/Android)</li>
+                <li>Share screenshots or screen recordings when relevant</li>
+                <li>Describe the steps to reproduce the issue</li>
+                <li>If it’s a collaboration, include links and a brief proposal</li>
+            </ul>
+
+            <h2>Response Time</h2>
+            <p>We aim to respond within 2–3 business days.</p>
+
+            <h2>Privacy Note</h2>
+            <p>Please don’t email sensitive personal information (like passwords). If you’re reporting an account issue, share only what’s needed for us to help.</p>
+
+            <p style="margin-top: 2rem;">
+                You can also review our <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>.
+            </p>
+        </div>
+    </main>
+</body>
+</html>
